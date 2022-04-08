@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package = "MiniLab2/compression";
+
+package compression;
+
+message CompressionRequest {
+    string file_name = 1;
+    bytes file_bytes = 2;
+    string routing_key = 3;
+}
+
+enum SuccessStatus {
+    SUCCESS_STATUS_SUCCESS = 0;
+    SUCCESS_STATUS_FAIL = 1;
+}
+
+message CompressionResponse {
+    SuccessStatus success = 1;
+    string error_message = 2;
+}
+
+service Compression {
+    rpc CompressFile(CompressionRequest) returns (CompressionResponse) {}
+}
