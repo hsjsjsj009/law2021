@@ -1,0 +1,25 @@
+version: "3.7"
+
+services:
+  nginx-1:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./default_conf_server_1.conf:/etc/nginx/conf.d/default.conf
+  nginx-2:
+    image: nginx:alpine
+    volumes:
+      - ./default_conf_server_2.conf:/etc/nginx/conf.d/default.conf
+  upload:
+    build:
+      context: .
+      dockerfile: ./upload/Dockerfile
+    volumes:
+      - ./static:/opt/main/static
+  download:
+    build:
+      context: .
+      dockerfile: ./download/Dockerfile
+    volumes:
+      - ./static:/opt/main/static

@@ -1,0 +1,27 @@
+version: "3.7"
+
+services:
+  rest:
+    build:
+      context: .
+      dockerfile: ./rest/Dockerfile
+    ports:
+      - "8080:8080"
+
+  web:
+    build:
+      context: .
+      dockerfile: ./web/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - REST_SERVER=rest:8080
+
+  web-reverse-proxy:
+    build:
+      context: web-reverse-proxy
+      dockerfile: Dockerfile
+    ports:
+      - "8082:80"
+    environment:
+      - REST_SERVER=rest:8080

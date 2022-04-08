@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JWT Simulator</title>
+</head>
+<body>
+    <nav>
+        <a href="/">Generate JWT</a>
+    </nav>
+    <h1>JWT Simulator</h1>
+    <form action="/reverse" method="post">
+        <label for="key">Key</label>
+        <input type="text" id="key" name="key">
+        <label for="token">Token</label>
+        <input type="text" id="token" name="token">
+        <button type="submit">Reverse</button>
+    </form>
+    {{if .Post}}
+        <h3>Data : {{.Data}}</h3>
+        <h3>Time : {{.Time}}</h3>
+    {{end}}
+</body>
+</html>

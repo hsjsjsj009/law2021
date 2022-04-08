@@ -1,0 +1,57 @@
+<html>
+<div id="progress" style="height: 500px;overflow: auto">
+    <p id="status">Waiting</p>
+    <label for="file">File progress:</label>
+    <progress id="file" max="100" value="0"></progress>
+    <p id="value">0%</p>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script type = "text/javascript">
+    let client_display;
+    if ("WebSocket" in window) {
+        const on_message_display = function(m) {
+            const data = JSON.parse(m.body)
+            console.log('message received',data);
+            if(data.type === "progress") {
+                document.getElementById("status").innerHTML = "Downloading"
+                document.getElementById("file").value = data.value
+                document.getElementById("value").innerHTML = `${data.value.toFixed(2)}%`
+            }else {
+                document.getElementById("status").innerHTML = "Done Downloading"
+                document.getElementById("file").value = 100
+                document.getElementById("progress").innerHTML += '<a href="'+data.url+'">Download</a>'
+                window.open(data.url,"_blank")
+            }
+        };
+        client_display = new StompJs.Client({
+            brokerURL:`{{.WSLink}}`.replace(/"/g,""),
+            connectHeaders:{
+                login:'guest',
+                passcode:'guest'
+            },
+            debug: console.log,
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        })
+        const mq_queue_display = {{.Exchange}};
+
+        client_display.onConnect = function () {
+            console.log('connected');
+            client_display.subscribe(mq_queue_display, on_message_display);
+        };
+
+        client_display.onStompError = function () {
+            console.log('error');
+        };
+
+        client_display.activate();
+
+    } else {
+        // The browser doesn't support WebSocket
+        alert("WebSocket NOT supported by your Browser!");
+    }
+</script>
+</html>

@@ -1,0 +1,72 @@
+<html>
+      <div id="chatbox" style="height: 500px;overflow: auto"></div>
+      <label for="chat-name">Name</label>
+      <input type="text" id="chat-name" disabled>
+      <label for="chat-msg">Message</label>
+      <input type="text" id="chat-msg">
+      <button onclick="SendMessage()">Send</button>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.min.js"></script>
+      <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+      <script type = "text/javascript">
+            let client_display;
+            if ("WebSocket" in window) {
+                  const name = Math.random().toString(16).substr(2,10);
+                  document.getElementById('chat-name').value = name
+                  const on_message_display = function(m) {
+                        const data = JSON.parse(m.body)
+                        console.log('message received');
+                        $('#chatbox').append(`<p>${data.from}: ${data.data}</p>`)
+                        const chatBox = document.getElementById("chatbox")
+                        chatBox.scrollTo(0,chatBox.scrollHeight)
+                  };
+                  client_display = new StompJs.Client({
+                        brokerURL:`ws://${window.location.host}/ws`,
+                        connectHeaders:{
+                              login:'guest',
+                              passcode:'guest'
+                        },
+                        debug: console.log,
+                        reconnectDelay: 5000,
+                        heartbeatIncoming: 4000,
+                        heartbeatOutgoing: 4000,
+                  })
+                  const mq_queue_display = "/exchange/x-exchange/stream";
+
+                  client_display.onConnect = function () {
+                        console.log('connected');
+                        client_display.subscribe(mq_queue_display, on_message_display);
+                  };
+
+                  client_display.onStompError = function () {
+                        console.log('error');
+                  };
+
+
+                  client_display.activate();
+
+            } else {
+               // The browser doesn't support WebSocket
+               alert("WebSocket NOT supported by your Browser!");
+            }
+
+            function SendMessage() {
+                  const fieldName = document.getElementById("chat-name")
+                  const fieldMessage = document.getElementById("chat-msg")
+                  if (fieldMessage.value === "") {
+                        return
+                  }
+                  client_display.publish({
+                        destination:"/exchange/x-exchange",
+                        body: JSON.stringify({
+                              'from':fieldName.value,
+                              'data':fieldMessage.value
+                        }),
+                        headers: {
+                              'content-type' : 'application/json'
+                        }
+                  })
+                  fieldMessage.value = ''
+            }
+      </script>
+</html>
